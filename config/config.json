@@ -1,0 +1,13 @@
+{
+  "mesh": {
+    "chord": 1.0,
+    "n_numbers": 100,
+    "m_numbers": 100,
+    "max_camber": 0,
+    "max_location": 0,
+    "thickness": 12,
+    "radius": 30,
+    "is_sys": true,
+    "type": "O"
+  }
+}
