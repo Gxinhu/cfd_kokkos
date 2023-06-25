@@ -7,7 +7,7 @@
 namespace cfd_kokkos {
 
 struct MeshParams {
-  using MeshPtr = std::shared_ptr<MeshParams>;
+  using MeshParamsPtr = std::shared_ptr<MeshParams>;
   precision chord_{};
   precision thickness_{};
   precision max_camber_{};
@@ -39,11 +39,11 @@ class Params {
       throw std::runtime_error("Could not Open file");
     }
     auto data = json::parse(f);
-    mesh_ptr_->setup(data["mesh"]);
+    mesh_params_ptr_->setup(data["mesh"]);
     data.clear();
     f.close();
   };
 
-  MeshParams::MeshPtr mesh_ptr_ = std::make_shared<MeshParams>();
+  MeshParams::MeshParamsPtr mesh_params_ptr_ = std::make_shared<MeshParams>();
 };
 }  // namespace cfd_kokkos

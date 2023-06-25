@@ -18,8 +18,9 @@ int main(int argc, char *argv[]) {
   {
     auto parameters  = std::make_shared<cfd_kokkos::Params>(config_file);
     auto mesh_solver = cfd_kokkos::mesh::MeshSolverFactory::Instance().create(
-        parameters->mesh_ptr_);
+        parameters->mesh_params_ptr_);
     mesh_solver->solve();
+    mesh_solver->save_mesh();
   }
   Kokkos::finalize();
   return 0;

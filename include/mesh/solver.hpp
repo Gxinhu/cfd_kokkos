@@ -10,19 +10,20 @@ namespace cfd_kokkos::mesh {
 
 class MeshSolverBase {
  public:
-  explicit MeshSolverBase(const MeshParams::MeshPtr& mesh_ptr);
+  explicit MeshSolverBase(const MeshParams::MeshParamsPtr& mesh_ptr);
   virtual void solve() = 0;
   virtual void init()  = 0;
   std::shared_ptr<NACA4DigitBase> mesh_;
+  void save_mesh() const;
 };
 
 class MeshSolverO : public MeshSolverBase {
  public:
-  explicit MeshSolverO(const MeshParams::MeshPtr& mesh_ptr);
+  explicit MeshSolverO(const MeshParams::MeshParamsPtr& mesh_ptr);
   void solve() override;
   void init() override;
   static std::shared_ptr<MeshSolverBase> create(
-      const MeshParams::MeshPtr& mesh_ptr);
+      const MeshParams::MeshParamsPtr& mesh_ptr);
 };
 
 class MeshSolverC {};
@@ -37,7 +38,7 @@ class MeshSolverFactory {
   }  // non-copyable
 
   using SolverCreateFn = std::shared_ptr<MeshSolverBase> (*)(
-      const MeshParams::MeshPtr& mesh_params);
+      const MeshParams::MeshParamsPtr& mesh_params);
   using SolverCreateMap = std::map<std::string, SolverCreateFn>;
   SolverCreateMap solver_map_;
 
@@ -47,7 +48,7 @@ class MeshSolverFactory {
   static MeshSolverFactory& Instance();
   void registerSolver(const std::string& key, SolverCreateFn cfn);
   std::shared_ptr<MeshSolverBase> create(
-      const MeshParams::MeshPtr& mesh_params);
+      const MeshParams::MeshParamsPtr& mesh_params);
 };
 
 }  // namespace cfd_kokkos::mesh

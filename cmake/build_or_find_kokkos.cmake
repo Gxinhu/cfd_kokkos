@@ -23,11 +23,11 @@ option(KOKKOS_PROJ_TMPL_USE_GIT "Turn ON if you want to use git to download Kokk
 #
 
 # set default backend
-set(KOKKOS_PROJ_TMPL_BACKEND "Undefined" CACHE STRING
+set(KOKKOS_CFD_BACKEND "Undefined" CACHE STRING
   "Kokkos default backend device")
 
 # Set the possible values for kokkos backend device
-set_property(CACHE KOKKOS_PROJ_TMPL_BACKEND PROPERTY STRINGS
+set_property(CACHE KOKKOS_CFD_BACKEND PROPERTY STRINGS
   "OpenMP" "Cuda" "HIP" "Undefined")
 
 # check if user requested a build of kokkos
@@ -37,7 +37,7 @@ message("[euler / kokkos] Building kokkos from source")
 
 # use predefined cmake args
 # can be override on the command line
-if(KOKKOS_PROJ_TMPL_BACKEND MATCHES "Cuda")
+if(KOKKOS_CFD_BACKEND MATCHES "Cuda")
   if((NOT DEFINED Kokkos_ENABLE_HWLOC) OR(NOT Kokkos_ENABLE_HWLOC))
     set(Kokkos_ENABLE_HWLOC ON CACHE BOOL "")
   endif()
@@ -59,7 +59,7 @@ if(KOKKOS_PROJ_TMPL_BACKEND MATCHES "Cuda")
   endif()
 
 # Note : cuda architecture will probed by kokkos cmake configure
-elseif(KOKKOS_PROJ_TMPL_BACKEND MATCHES "HIP")
+elseif(KOKKOS_CFD_BACKEND MATCHES "HIP")
   if((NOT DEFINED Kokkos_ENABLE_HWLOC) OR(NOT Kokkos_ENABLE_HWLOC))
     set(Kokkos_ENABLE_HWLOC ON CACHE BOOL "")
   endif()
@@ -72,7 +72,7 @@ elseif(KOKKOS_PROJ_TMPL_BACKEND MATCHES "HIP")
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "")
   endif()
 
-elseif(KOKKOS_PROJ_TMPL_BACKEND MATCHES "OpenMP")
+elseif(KOKKOS_CFD_BACKEND MATCHES "OpenMP")
   if((NOT DEFINED Kokkos_ENABLE_HWLOC) OR(NOT Kokkos_ENABLE_HWLOC))
     set(Kokkos_ENABLE_HWLOC ON CACHE BOOL "")
   endif()
@@ -81,8 +81,8 @@ elseif(KOKKOS_PROJ_TMPL_BACKEND MATCHES "OpenMP")
     set(Kokkos_ENABLE_OPENMP ON CACHE BOOL "")
   endif()
 
-elseif(KOKKOS_PROJ_TMPL_BACKEND MATCHES "Undefined")
-  message(FATAL_ERROR "[euler / kokkos] You must chose a valid KOKKOS_PROJ_TMPL_BACKEND !")
+elseif(KOKKOS_CFD_BACKEND MATCHES "Undefined")
+  message(FATAL_ERROR "[euler / kokkos] You must chose a valid KOKKOS_CFD_BACKEND !")
 endif()
 
 # we set c++ standard to c++-17 as kokkos >= 4.0.00 requires at least c++-17
