@@ -21,7 +21,8 @@ class NACA4DigitBase {
   MeshMatrix::HostMirror h_points_{};
   precision radius_{};
   precision chord_{};
-  MeshMatrix points_{};
+  MeshMatrix points1_{};
+  MeshMatrix points2_{};
 
  private:
   constexpr static precision kA0 = 0.2969;

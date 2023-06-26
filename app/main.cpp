@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
   std::string config_file;
-  if (argc < 2) {
+  if (argc < 1) {
     const std::string path   = argv[0];
     std::size_t last_sep_pos = path.find_last_of("/\\");
     std::string directory    = path.substr(0, last_sep_pos);

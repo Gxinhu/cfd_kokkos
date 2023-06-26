@@ -14,7 +14,10 @@ struct MeshParams {
   precision max_location_{};
   size_t n_numbers_{};
   size_t m_numbers_{};
+  size_t display_iter_{};
+  size_t max_iter_{};
   precision radius_{};
+  precision error_{};
   std::string type_{};
   bool is_sys_ = false;
   void setup(json& data) {
@@ -24,8 +27,11 @@ struct MeshParams {
     m_numbers_    = data["m_numbers"].get<int>();
     max_camber_   = data["max_camber"].get<int>();
     max_location_ = data["max_location"].get<int>();
+    display_iter_ = data["display_iter"].get<int>();
+    max_iter_ = data["max_iter"].get<int>();
     is_sys_       = data["is_sys"].get<bool>();
     radius_       = data["radius"].get<precision>();
+    error_       = data["error"].get<precision>();
     type_         = data["type"].get<std::string>();
   }
 };

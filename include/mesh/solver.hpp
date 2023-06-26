@@ -10,9 +10,10 @@ namespace cfd_kokkos::mesh {
 
 class MeshSolverBase {
  public:
-  explicit MeshSolverBase(const MeshParams::MeshParamsPtr& mesh_ptr);
+  explicit MeshSolverBase(const MeshParams::MeshParamsPtr& mesh_params);
   virtual void solve() = 0;
   virtual void init()  = 0;
+  std::shared_ptr<MeshParams> mesh_params_;
   std::shared_ptr<NACA4DigitBase> mesh_;
   void save_mesh() const;
 };

@@ -11,9 +11,11 @@ NACA4DigitBase::NACA4DigitBase(const MeshParams::MeshParamsPtr& mesh_params)
       n_numbers_(mesh_params->n_numbers_),
       m_numbers_(mesh_params->m_numbers_),
       radius_(mesh_params->radius_),
-      points_(MeshMatrix("mesh_points", mesh_params->m_numbers_,
-                         mesh_params->n_numbers_, 2)) {
-  h_points_ = Kokkos::create_mirror(points_);
+      points1_(MeshMatrix("mesh_points", mesh_params->m_numbers_,
+                          mesh_params->n_numbers_, 2)),
+      points2_(MeshMatrix("mesh_points_copy", mesh_params->m_numbers_,
+                          mesh_params->n_numbers_, 2)) {
+  h_points_ = Kokkos::create_mirror(points1_);
 }
 
 KOKKOS_INLINE_FUNCTION
@@ -43,7 +45,7 @@ void NACA4DigitSys::init() {
   for (int i = n_numbers_ / 2; i < n_numbers_; ++i) {
     h_points_(0, i, 1) = -h_points_(0, i, 1);
   }
-  Kokkos::deep_copy(points_, h_points_);
+  Kokkos::deep_copy(points1_, h_points_);
 }
 
 NACA4DigitNonSys::NACA4DigitNonSys(const MeshParams::MeshParamsPtr& mesh_params)
@@ -52,7 +54,7 @@ NACA4DigitNonSys::NACA4DigitNonSys(const MeshParams::MeshParamsPtr& mesh_params)
 void NACA4DigitNonSys::init() {
   common_init();
   // TODO(xhu): Implement Non Sys Naca airfoil code
-  Kokkos::deep_copy(points_, h_points_);
+  Kokkos::deep_copy(points1_, h_points_);
 }
 
 MeshAirfoilFactory::MeshAirfoilFactory() = default;

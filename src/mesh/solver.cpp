@@ -1,20 +1,36 @@
 #include "mesh/solver.hpp"
 #include "io/save_vtk.hpp"
+#include "mesh/functor.hpp"
+#include "util/cfd_shared.hpp"
 
 namespace cfd_kokkos::mesh {
 
-MeshSolverBase::MeshSolverBase(const MeshParams::MeshParamsPtr& mesh_ptr) {
-  mesh_ = cfd_kokkos::mesh::MeshAirfoilFactory::create(mesh_ptr);
+MeshSolverBase::MeshSolverBase(const MeshParams::MeshParamsPtr& mesh_params)
+    : mesh_params_(mesh_params) {
+  mesh_ = cfd_kokkos::mesh::MeshAirfoilFactory::create(mesh_params);
 }
 
 void MeshSolverBase::save_mesh() const {
+  Kokkos::deep_copy(mesh_->h_points_, mesh_->points1_);
   io::save_vtk_2d(mesh_->h_points_, "mesh.vts");
 }
 
 MeshSolverO::MeshSolverO(const MeshParams::MeshParamsPtr& mesh_ptr)
     : MeshSolverBase(mesh_ptr) {}
 
-void MeshSolverO::solve() { fmt::print("Hello World\n"); }
+void MeshSolverO::solve() {
+  precision error = 1;
+  int iters       = 0;
+  while (error > mesh_params_->error_ and iters < mesh_params_->max_iter_) {
+    error = 0;
+    BoundaryFitFunctor::apply(mesh_->points1_, mesh_->points2_, error);
+    std::swap(mesh_->points1_, mesh_->points2_);
+    if (iters % mesh_params_->display_iter_ == 0) {
+      fmt::print("Iter {}, error {}\n", iters, error);
+    }
+    iters++;
+  }
+}
 
 void MeshSolverO::init() {
   fmt::print("###Init Mesh###");
@@ -43,7 +59,8 @@ void MeshSolverO::init() {
               (mesh_->m_numbers_ - 1.0);
     }
   }
-  Kokkos::deep_copy(mesh_->points_, mesh_->h_points_);
+  Kokkos::deep_copy(mesh_->points1_, mesh_->h_points_);
+  Kokkos::deep_copy(mesh_->points2_, mesh_->points1_);
 }
 
 std::shared_ptr<MeshSolverBase> MeshSolverO::create(

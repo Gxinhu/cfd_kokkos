@@ -1,0 +1,56 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 15,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "Debug_cuda",
+            "description": "Debug build",
+            "hidden": false,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/debug/cuda",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "Kokkos_ARCH_ADA89": "ON",
+                "KOKKOS_CFD_BACKEND": "Cuda"
+            }
+        },
+        {
+            "name": "Debug_openmp",
+            "description": "Debug build",
+            "hidden": false,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/debug/openmp",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "KOKKOS_CFD_BACKEND": "OpenMP"
+            }
+        },
+        {
+            "name": "Release_cuda",
+            "description": "Release build",
+            "hidden": false,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release/cuda",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "Kokkos_ARCH_ADA89": "ON",
+                "KOKKOS_CFD_BACKEND": "Cuda"
+            }
+        },
+        {
+            "name": "Release_openmp",
+            "description": "Release build",
+            "hidden": false,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release/openmp",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "KOKKOS_CFD_BACKEND": "OpenMP"
+            }
+        }
+    ]
+}

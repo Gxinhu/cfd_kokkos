@@ -1,7 +1,7 @@
 # use minimum version required by Kokkos
 cmake_minimum_required(VERSION 3.22)
 
-project(kokkos-proj-tmpl
+project(cfd-kokkos
   LANGUAGES CXX)
 
 # always export compile commands database
