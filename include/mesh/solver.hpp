@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <shared_mutex>
-#include "airfoil.hpp"
+#include "mesh/airfoil.hpp"
 #include "fmt/core.h"
 #include "mesh/mesh_shared.hpp"
 #include "util/parameters.hpp"

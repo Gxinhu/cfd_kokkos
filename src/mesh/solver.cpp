@@ -1,6 +1,8 @@
 #include "mesh/solver.hpp"
+
 #include "io/save_vtk.hpp"
 #include "mesh/functor.hpp"
+#include "mesh/unsturctured_solver.hpp"
 #include "util/cfd_shared.hpp"
 
 namespace cfd_kokkos::mesh {
@@ -34,8 +36,7 @@ void MeshSolverO::solve() {
 
 void MeshSolverO::init() {
   fmt::print("###Init Mesh###");
-
-  precision d_theta = (M_PI * 2) / (mesh_->n_numbers_ - 1);
+  precision d_theta = (M_PI * 2) / mesh_->n_numbers_ ;
   for (int i = 0; i < mesh_->n_numbers_; ++i) {
     auto theta = i * d_theta;
     auto x     = mesh_->chord_ / 2.0 + mesh_->radius_ * std::cos(theta);
@@ -71,6 +72,7 @@ std::shared_ptr<MeshSolverBase> MeshSolverO::create(
 
 MeshSolverFactory::MeshSolverFactory() {
   registerSolver("O", &MeshSolverO::create);
+  registerSolver("O_unstructured", &MeshSolverOUnstructured::create);
 }
 
 MeshSolverFactory::~MeshSolverFactory() { solver_map_.clear(); }

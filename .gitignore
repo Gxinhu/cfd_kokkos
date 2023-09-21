@@ -1,5 +1,5 @@
 _build
-build/*
+build
 build_cuda
 build_openmp
 build_serial

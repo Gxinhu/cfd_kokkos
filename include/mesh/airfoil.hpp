@@ -1,10 +1,11 @@
 #pragma once
-#include "Kokkos_Macros.hpp"
-#include "util/cfd_shared.hpp"
-#include "mesh/mesh_shared.hpp"
-#include "util/parameters.hpp"
 #include <cmath>
 #include <memory>
+
+#include "Kokkos_Macros.hpp"
+#include "mesh/mesh_shared.hpp"
+#include "util/cfd_shared.hpp"
+#include "util/parameters.hpp"
 
 namespace cfd_kokkos::mesh {
 
@@ -26,8 +27,8 @@ class NACA4DigitBase {
 
  private:
   constexpr static precision kA0 = 0.2969;
-  constexpr static precision kA1 = -0.1221;
-  constexpr static precision kA2 = -0.3576;
+  constexpr static precision kA1 = -0.1260;
+  constexpr static precision kA2 = -0.3516;
   constexpr static precision kA3 = 0.2843;
   constexpr static precision kA4 = -0.1015;
   precision thickness_{};

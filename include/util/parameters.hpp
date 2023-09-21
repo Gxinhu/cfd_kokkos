@@ -1,9 +1,10 @@
 #pragma once
 #include <cstddef>
+#include <fstream>
 #include <memory>
+
 #include "cfd_shared.hpp"
 #include "mesh/mesh_shared.hpp"
-#include <fstream>
 namespace cfd_kokkos {
 
 struct MeshParams {
@@ -28,10 +29,10 @@ struct MeshParams {
     max_camber_   = data["max_camber"].get<int>();
     max_location_ = data["max_location"].get<int>();
     display_iter_ = data["display_iter"].get<int>();
-    max_iter_ = data["max_iter"].get<int>();
+    max_iter_     = data["max_iter"].get<int>();
     is_sys_       = data["is_sys"].get<bool>();
     radius_       = data["radius"].get<precision>();
-    error_       = data["error"].get<precision>();
+    error_        = data["error"].get<precision>();
     type_         = data["type"].get<std::string>();
   }
 };

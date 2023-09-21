@@ -11,6 +11,6 @@
     "thickness": 12,
     "radius": 30,
     "is_sys": true,
-    "type": "O"
+    "type": "O_unstructured"
   }
 }
