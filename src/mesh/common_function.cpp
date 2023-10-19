@@ -27,4 +27,12 @@ bool is_cross(const NodePtr &a, const NodePtr &b, const NodePtr &c,
   return false;
 }
 
+bool is_left_cell(const NodePtr &a, const NodePtr &b, const NodePtr &c) {
+  auto x1  = b->x_ - a->x_;
+  auto y1  = b->y_ - a->y_;
+  auto x2  = c->x_ - a->x_;
+  auto y2  = c->y_ - a->y_;
+  auto res = x1 * y2 - x2 * y1;
+  return res > 0;
+}
 }  // namespace cfd_kokkos::mesh

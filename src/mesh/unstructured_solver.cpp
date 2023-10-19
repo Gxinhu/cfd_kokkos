@@ -43,13 +43,13 @@ void MeshSolverOUnstructured::init() {
   }
   for (int i = 1; i < graph_->node_num_; ++i) {
     auto face = std::make_shared<Face>(graph_->nodes_[i - 1], graph_->nodes_[i],
-                                       BoundaryType::kRealBoundary, -1, 0);
+                                       BoundaryType::kRealBoundary, 0, -1);
     graph_->add_front(face);
   }
   auto last_node        = graph_->nodes_[graph_->node_num_ - 1];
   auto surface_node_num = graph_->node_num_;
   graph_->add_front(std::make_shared<Face>(last_node, graph_->nodes_[0],
-                                           BoundaryType::kRealBoundary, -1, 0));
+                                           BoundaryType::kRealBoundary, 0, -1));
 
   for (int i = 0; i < mesh_->n_numbers_; ++i) {
     auto theta = i * d_theta;
@@ -68,36 +68,39 @@ void MeshSolverOUnstructured::init() {
   for (int i = surface_node_num + 1; i < graph_->node_num_; ++i) {
     auto node = graph_->nodes_[i];
     auto face = std::make_shared<Face>(last_node, node,
-                                       BoundaryType::kRealBoundary, -1, 0);
+                                       BoundaryType::kRealBoundary, 0, -1);
     graph_->add_front(face);
     last_node = node;
   }
   graph_->add_front(std::make_shared<Face>(last_node,
                                            graph_->nodes_[surface_node_num],
-                                           BoundaryType::kRealBoundary, -1, 0));
+                                           BoundaryType::kRealBoundary, 0, -1));
 }
 
+//FIXME: Have bugs needed to be fixed
 void MeshSolverOUnstructured::solve() {
   while (graph_->front_num_ > 0) {
     auto selected_node = generate_tri(*graph_->front_list_.begin());
     if (selected_node == nullptr) {
       search_range_ = search_range_ * 1.2;
     } else {
+      fmt::print("Front left {}\n", graph_->front_num_);
+      update_info_tri(*graph_->front_list_.begin(), selected_node);
+      graph_->remove_inactive_front();
       search_range_ = 3.0;
     }
   }
-  // TODO(xhu): 在这里实现阵面推进算法
 }
 
-NodePtr MeshSolverOUnstructured::new_point(FacePtr face) {
+NodePtr MeshSolverOUnstructured::new_point(FacePtr face, precision sp) {
   auto normal_vector_x =
-      -(face->node2_->y_ - face->node1_->y_) / (face->distance_ + 1e-10);
+      (face->node2_->y_ - face->node1_->y_) / (face->distance_ + 1e-10);
 
   auto normal_vector_y =
-      -(face->node2_->x_ - face->node1_->x_) / (face->distance_ + 1e-10);
+      (face->node2_->x_ - face->node1_->x_) / (face->distance_ + 1e-10);
 
-  auto x        = (face->node1_->x_ + face->node2_->x_) / 2.0 + normal_vector_x;
-  auto y        = (face->node1_->y_ + face->node2_->y_) / 2.0 + normal_vector_y;
+  auto x = (face->node1_->x_ + face->node2_->x_) / 2.0 + normal_vector_x * sp;
+  auto y = (face->node1_->y_ + face->node2_->y_) / 2.0 + normal_vector_y * sp;
   auto new_node = std::make_shared<Node>(-1, x, y);
   return new_node;
 }
@@ -107,14 +110,14 @@ NodePtr MeshSolverOUnstructured::generate_tri(FacePtr face) {
   if (face->boundary_type_ == BoundaryType::kRealBoundary) {
     sp = face->distance_ * sqrt(3.0) / 2.0;
   }
-  auto new_node   = new_point(face);
+  auto new_node   = new_point(face, sp);
   auto radius_pow = pow(search_range_ * sp, 2);
   auto candidates_node_front =
-      find_candicate_node_front(new_node, radius_pow, face);
-  auto candidate_front = find_candicate_front(candidates_node_front);
+      find_candidate_node_front(new_node, radius_pow, face);
+  auto candidate_front = find_candidate_front(candidates_node_front);
 
   auto candidates_node_face =
-      find_candicate_node_face(new_node, radius_pow, face);
+      find_candidate_node_face(new_node, radius_pow, face);
   std::set<NodePtr> candidate_node;
   std::set_union(candidates_node_front.begin(), candidates_node_front.end(),
                  candidates_node_face.begin(), candidates_node_face.end(),
@@ -151,9 +154,9 @@ NodePtr MeshSolverOUnstructured::generate_tri(FacePtr face) {
     if (flag) {
       continue;
     }
-    if (cell->is_right_cell_) {
+    if (cell->is_left_cell_) {
       selected_cell = cell;
-      // FIXME 目前左右 cell 还有问题，需要解决
+      break;
     }
   }
   if (selected_cell != nullptr) {
@@ -164,7 +167,7 @@ NodePtr MeshSolverOUnstructured::generate_tri(FacePtr face) {
   }
   return nullptr;
 }
-std::set<NodePtr> MeshSolverOUnstructured::find_candicate_node_front(
+std::set<NodePtr> MeshSolverOUnstructured::find_candidate_node_front(
     const NodePtr& new_node, precision radius_pow, const FacePtr& face) {
   std::set<NodePtr> candidates;
   candidates.insert(new_node);
@@ -194,7 +197,7 @@ std::set<NodePtr> MeshSolverOUnstructured::find_candicate_node_front(
   return candidates;
 }
 
-std::set<NodePtr> MeshSolverOUnstructured::find_candicate_node_face(
+std::set<NodePtr> MeshSolverOUnstructured::find_candidate_node_face(
     const NodePtr& new_node, precision radius_pow, const FacePtr& face) {
   std::set<NodePtr> candidates;
   candidates.insert(new_node);
@@ -224,10 +227,10 @@ std::set<NodePtr> MeshSolverOUnstructured::find_candicate_node_face(
   return candidates;
 }
 
-std::set<FacePtr> MeshSolverOUnstructured::find_candicate_front(
+std::set<FacePtr> MeshSolverOUnstructured::find_candidate_front(
     const std::set<NodePtr>& candidates) {
   std::set<FacePtr> candidate_front;
-  for (auto& front : graph_->front_list_) {
+  for (const auto& front : graph_->front_list_) {
     if (candidates.find(front->node1_) != candidates.end() ||
         candidates.find(front->node2_) != candidates.end()) {
       candidate_front.insert(front);
@@ -260,4 +263,82 @@ std::set<CellPtr, CellComparator> MeshSolverOUnstructured::quality_check_tri(
   return candidate_cell;
 }
 
+void MeshSolverOUnstructured::update_tri_cells(const FacePtr& face,
+                                               const NodePtr& selected_node) {
+  update_info_tri(face, selected_node);
+};
+
+void MeshSolverOUnstructured::update_info_tri(const FacePtr& face,
+                                              const NodePtr& selected_node) {
+  auto flag1 = is_left_cell(face->node1_, face->node2_, selected_node);
+  if (!flag1) {
+    face->left_cell_ = graph_->cell_num_;
+  } else {
+    face->right_cell_ = graph_->cell_num_;
+  }
+
+  auto flag2      = is_left_cell(selected_node, face->node1_, face->node2_);
+  auto pair       = graph_->front_exist(selected_node, face->node1_);
+  auto exist_face = pair.first;
+  auto direction  = pair.second;
+  if (flag2) {
+    if (exist_face != nullptr) {
+      if (direction) {
+        exist_face->right_cell_ = graph_->cell_num_;
+      } else {
+        exist_face->left_cell_ = graph_->cell_num_;
+      }
+    } else {
+      auto f = std::make_shared<Face>(face->node1_, selected_node,
+                                      BoundaryType::kNewBoundary,
+                                      graph_->cell_num_, -1);
+      graph_->add_front(f);
+    }
+  } else {
+    if (exist_face != nullptr) {
+      if (direction) {
+        exist_face->left_cell_ = graph_->cell_num_;
+      } else {
+        exist_face->right_cell_ = graph_->cell_num_;
+      }
+    } else {
+      auto f = std::make_shared<Face>(face->node1_, selected_node,
+                                      BoundaryType::kNewBoundary, -1,
+                                      graph_->cell_num_);
+      graph_->add_front(f);
+    }
+  }
+
+  auto flag3 = is_left_cell(selected_node, face->node1_, face->node2_);
+  pair       = graph_->front_exist(selected_node, face->node1_);
+  exist_face = pair.first;
+  direction  = pair.second;
+  if (flag3) {
+    if (exist_face != nullptr) {
+      if (direction) {
+        exist_face->right_cell_ = graph_->cell_num_;
+      } else {
+        exist_face->left_cell_ = graph_->cell_num_;
+      }
+    } else {
+      auto f = std::make_shared<Face>(selected_node, face->node1_,
+                                      BoundaryType::kNewBoundary,
+                                      graph_->cell_num_, -1);
+      graph_->add_front(f);
+    }
+  } else {
+    if (exist_face != nullptr) {
+      if (direction) {
+        exist_face->left_cell_ = graph_->cell_num_;
+      } else {
+        exist_face->right_cell_ = graph_->cell_num_;
+      }
+    } else {
+      auto f = std::make_shared<Face>(face->node2_, selected_node,
+                                      BoundaryType::kNewBoundary, -1,
+                                      graph_->cell_num_);
+      graph_->add_front(f);
+    }
+  }
+}
 }  // namespace cfd_kokkos::mesh

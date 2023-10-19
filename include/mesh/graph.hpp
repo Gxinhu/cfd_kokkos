@@ -87,7 +87,7 @@ class Cell {
     auto x2       = node3_->x_ - node1_->x_;
     auto y2       = node3_->y_ - node1_->y_;
     auto res      = x1 * y2 - x2 * y1;
-    is_right_cell_ = (res > 0);
+    is_left_cell_ = (res > 0);
   }
 
   int id_;
@@ -95,7 +95,7 @@ class Cell {
   NodePtr node1_;
   NodePtr node2_;
   NodePtr node3_;
-  bool is_right_cell_;
+  bool is_left_cell_;
 
   bool operator>(const Cell &other) const { return quality_ > other.quality_; }
 };
@@ -131,6 +131,8 @@ class Graph {
   void add_front(const FacePtr &front);
   void remove_front(const FacePtr &front);
   void sort_front();
+  std::pair<FacePtr, bool> front_exist(const NodePtr &node1, const NodePtr &node2);
+  void remove_inactive_front();
 
  private:
 };
